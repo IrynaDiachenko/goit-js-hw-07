@@ -32,22 +32,31 @@ function handlerGallery(event) {
   const filterDatasetImg = event.target.dataset.source;
   if (!filterDatasetImg) return;
 
-  const instance = basicLightbox.create(
-    `
-<img width="1280" height="860" src="${filterDatasetImg}">`,
-    {
-      onShow: instance => console.log('onShow', instance.element()),
-      onClose: instance => console.log('onClose', instance.element()),
-    },
-  );
-  instance.show();
+  const instance = basicLightbox
+    .create(
+      `
+  <div class="modal">
+  <img src="${event.target.dataset.source}" class="js-modal-img" width="800" height="600">
+  </div>
+`,
+      {
+        onShow: instance => {
+          window.addEventListener('keydown', onKeyboardClick);
+          function onKeyboardClick(event) {
+            if (event.code === 'Escape') {
+              instance.close();
+              window.removeEventListener('keydown', onKeyboardClick);
+            }
+          }
 
-  galleryImage.addEventListener('keydown', handlerRemove);
-  function handlerRemove(event) {
-    if (event.code === 'Escape') {
-      instance.close(() =>
-        galleryImage.removeEventListener('keydown', handlerRemove),
-      );
-    }
-  }
+          instance
+            .element()
+            .querySelector('.js-modal-img')
+            .addEventListener('click', () => {
+              instance.close();
+            });
+        },
+      },
+    )
+    .show();
 }
